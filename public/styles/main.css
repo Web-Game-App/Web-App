@@ -1,12 +1,105 @@
 body {
-    background: #FFFFFF;
+  background: #dddddd;
 }
 
 .navbar {
-    background-color: #800000;
-    color: white;
+  background-color: #800000;
+  color: white;
 }
 
 .page-container {
-    margin-top: 75px;
+  margin-top: 75px;
 }
+
+#roseLogo {
+  max-width: 320px;
+  margin: 20px auto;
+  display: block;
+}
+
+#rosefireButton {
+    display: block;
+    margin: 60px auto;
+    color: white;
+    background: #800000;
+    font-size: 1.1em;
+    padding: 10px 30px;
+    border-radius: 5px;
+}
+
+label.radio {
+  cursor: pointer;
+}
+
+label.radio input {
+  position: absolute;
+  top: 0; 
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+label.radio span {
+  padding: 4px 0px;
+  border: 1px solid red;
+  display: inline-block;
+  color: red;
+  width: 100px;
+  text-align: center;
+  border-radius: 3px;
+  margin-top: 7px;
+  text-transform: uppercase;
+}
+
+label.radio input:checked + span {
+  border-color: red;
+  background-color: red;
+  color: #fff;
+}
+
+.ans {
+  margin-left: 36px !important;
+}
+
+.btn:focus {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.btn:active {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+#listContainer {
+  margin-top: 20px;
+  background:#eee;
+    color: #708090;
+}
+
+#surveyColumn {
+  margin-top: 1rem!important;
+}
+
+.icon-1x {
+    font-size: 24px !important;
+}
+a{
+    text-decoration:none;    
+}
+.text-primary, a.text-primary:focus, a.text-primary:hover {
+    color: #00ADBB!important;
+}
+.text-black, .text-hover-black:hover {
+    color: #000 !important;
+}
+.font-weight-bold {
+    font-weight: 700 !important;
+}
+
+@media (min-width: 992px) {
+  .row {
+    margin-right: 0;
+  }
+ }
+
