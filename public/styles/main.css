@@ -88,7 +88,7 @@ a{
     text-decoration:none;    
 }
 .text-primary, a.text-primary:focus, a.text-primary:hover {
-    color: #00ADBB!important;
+    color: #800000!important;
 }
 .text-black, .text-hover-black:hover {
     color: #000 !important;
