@@ -27,6 +27,17 @@ body {
     border-radius: 5px;
 }
 
+#surveysPageButton,
+#resultsPageButton {
+  display: block;
+  margin: 240px auto;
+  color: white;    
+  background: #800000;
+  font-size: 4em;
+  padding: 10px 30px;
+  border-radius: 5px;
+}
+
 label.radio {
   cursor: pointer;
 }
