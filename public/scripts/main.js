@@ -1,13 +1,14 @@
 
 var rhit = rhit || {};
 
-rhit.FB_COLLECTION_MOVIEQUOTES = "MovieQuotes";
-rhit.FB_KEY_QUOTE = "quote";
-rhit.FB_KEY_MOVIE = "movie";
-rhit.FB_KEY_LAST_TOUCHED = "lastTouched";
+rhit.FB_COLLECTION_SURVEYS = "Surveys";
+rhit.FB_KEY_NAME = "name";
+rhit.FB_KEY_QUESTIONS = "questions";
+rhit.FB_KEY_TIME_POSTED = "timePosted";
 rhit.FB_KEY_AUTHOR = "author";
-rhit.fbMovieQuotesManager = null;
-rhit.fbSingleQuoteManager = null;
+rhit.singleSurveyManager = null;
+rhit.surveysManager = null;
+rhit.resultsManager = null;
 rhit.fbAuthManager = null;
 
 // From: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
@@ -20,12 +21,65 @@ function htmlToElement(html) {
 
 rhit.MainMenuController = class {
   constructor() {
-    
+    document.querySelector("#menuShowAllSurveys").onclick = (event) => {
+      window.location.href = "/list.html";
+    };
+
+    document.querySelector("#menuShowMySurveys").onclick = (event) => {
+      window.location.href = `/list.html?uid=${rhit.fbAuthManager.uid}`;
+    };
+
+    document.querySelector("#menuSignOut").onclick = (event) => {
+      rhit.fbAuthManager.signOut();
+    };
+
+     rhit.fbMovieQuotesManager.beginListening(this.updateList.bind(this));
+  }
+
+  _createCard(movieQuote) {
+    return htmlToElement(`<div class="card">
+          <div class="card-body">
+            <blockquote class="blockquote mb-0">
+              <p>${movieQuote.quote}</p>  
+              <footer class="blockquote-footer">
+                <cite title="Source Title">${movieQuote.movie}</cite>
+              </footer>
+            </blockquote>
+          </div>
+        </div>`);
   }
 
 
-  updateView() {
-    
+  updateList() {
+    console.log("update list");
+    console.log(`Num quotes = ${rhit.fbMovieQuotesManager.length}`);
+    console.log(
+      "Example quote = ",
+      rhit.fbMovieQuotesManager.getMovieQuoteAtIndex(0)
+    );
+
+    // Make a new quoteListContainer
+    const newList = htmlToElement('<div id="quoteListContainer"></div>');
+    // Fill
+    for (let i = 0; i < rhit.fbMovieQuotesManager.length; i++) {
+      const mq = rhit.fbMovieQuotesManager.getMovieQuoteAtIndex(i);
+      const newCard = this._createCard(mq);
+
+      newCard.onclick = (event) => {
+        // rhit.storage.setMovieQuoteId(mq.id);
+
+        window.location.href = `/moviequote.html?id=${mq.id}`;
+      };
+
+      newList.appendChild(newCard);
+    }
+
+    // Remove old
+    const oldList = document.querySelector("#quoteListContainer");
+    oldList.removeAttribute("id");
+    oldList.hidden = true;
+    // Put in new
+    oldList.parentElement.appendChild(newList);
   }
 };
 
@@ -47,15 +101,6 @@ rhit.SingleSurveyManager = class {
 
   }
   
-};
-
-rhit.MainMenuController = class {
-  constructor() {
-
-  }
-  updateView() {
-
-  }
 };
 
 rhit.ResultsController = class {
@@ -105,7 +150,7 @@ rhit.FbAuthManager = class {
     });
   }
   signIn() {
-    Rosefire.signIn("af481816-1cd0-4ffb-9711-03ad8f042ca1", (err, rfUser) => {
+    Rosefire.signIn("cde06e0a-db30-4dab-845a-a63409f9d16b", (err, rfUser) => {
       if (err) {
         console.log("Rosefire error!", err);
         return;
@@ -148,28 +193,32 @@ rhit.checkForRedirects = function () {
 
 rhit.initializePage = function () {
   const urlParams = new URLSearchParams(window.location.search);
-  if (document.querySelector("#listPage")) {
-    const uid = urlParams.get("uid");
-    rhit.fbMovieQuotesManager = new rhit.FbMovieQuotesManager(uid);
-    new rhit.ListPageController();
-  }
+  // if (document.querySelector("#listPage")) {
+  //   const uid = urlParams.get("uid");
+  //   rhit.fbMovieQuotesManager = new rhit.FbMovieQuotesManager(uid);
+  //   new rhit.ListPageController();
+  // }
 
-  if (document.querySelector("#detailPage")) {
-    // const movieQuoteId = rhit.storage.getMovieQuoteId();
-    // console.log(`Detail page for ${movieQuoteId}`);
+  // if (document.querySelector("#detailPage")) {
+  //   // const movieQuoteId = rhit.storage.getMovieQuoteId();
+  //   // console.log(`Detail page for ${movieQuoteId}`);
 
-    const movieQuoteId = urlParams.get("id");
+  //   const movieQuoteId = urlParams.get("id");
 
-    if (!movieQuoteId) {
-      window.location.href = "/";
-    }
+  //   if (!movieQuoteId) {
+  //     window.location.href = "/";
+  //   }
 
-    rhit.fbSingleQuoteManager = new rhit.FbSingleQuoteManager(movieQuoteId);
-    new rhit.DetailPageController();
-  }
+  //   rhit.fbSingleQuoteManager = new rhit.FbSingleQuoteManager(movieQuoteId);
+  //   new rhit.DetailPageController();
+  // }
 
   if (document.querySelector("#loginPage")) {
-    new rhit.LoginPageController();
+    new rhit.LoginController();
+  }
+
+  if (document.querySelector("#listPage")) {
+    new rhit.MainMenuController();
   }
 };
 
