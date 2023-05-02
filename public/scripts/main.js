@@ -226,6 +226,7 @@ rhit.initializePage = function () {
 /** function and class syntax examples */
 rhit.main = function () {
   console.log("Ready");
+  new rhit.MainMenuController();
   rhit.fbAuthManager = new rhit.FbAuthManager();
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
