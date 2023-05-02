@@ -27,7 +27,7 @@ rhit.MainMenuController = class {
     };
 
     document.querySelector("#menuShowMySurveys").onclick = (event) => {
-      window.location.href = `/list.html?uid=${rhit.fbAuthManager.uid}`;
+      window.location.href = `/userSurveyPage.html?uid=${rhit.fbAuthManager.uid}`;
     };
 
     document.querySelector("#menuSignOut").onclick = (event) => {
