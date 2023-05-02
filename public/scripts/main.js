@@ -4,6 +4,7 @@ var rhit = rhit || {};
 rhit.FB_COLLECTION_SURVEYS = "Surveys";
 rhit.FB_KEY_NAME = "name";
 rhit.FB_KEY_QUESTIONS = "questions";
+rhit.FB_KEY_RESPONSES = "responses";
 rhit.FB_KEY_TIME_POSTED = "timePosted";
 rhit.FB_KEY_AUTHOR = "author";
 rhit.singleSurveyManager = null;
@@ -33,49 +34,64 @@ rhit.MainMenuController = class {
       rhit.fbAuthManager.signOut();
     };
 
-     rhit.fbMovieQuotesManager.beginListening(this.updateList.bind(this));
+     rhit.surveysManager.beginListening(this.updateList.bind(this));
   }
 
-  _createCard(movieQuote) {
-    return htmlToElement(`<div class="card">
-          <div class="card-body">
-            <blockquote class="blockquote mb-0">
-              <p>${movieQuote.quote}</p>  
-              <footer class="blockquote-footer">
-                <cite title="Source Title">${movieQuote.movie}</cite>
-              </footer>
-            </blockquote>
-          </div>
-        </div>`);
+  _createCard(survey) {
+    return htmlToElement(`<div
+                  class="card row-hover pos-relative py-3 px-3 mb-3 border-warning border-top-0 border-right-0 border-bottom-0 rounded-0"
+                >
+                  <div class="row align-items-center">
+                    <div class="col-md-8 mb-3 mb-sm-0">
+                      <h5>
+                        <a href="/question.html?id=${survey.id}" class="text-primary"
+                          >${survey.name}</a
+                        >
+                      </h5>
+                      <p class="text-sm">
+                        <span class="op-6">Posted by</span>
+                        <a class="text-black" href="#">${survey.author}</a>
+                      </p>
+                    </div>
+                    <div class="col-md-4 op-7">
+                      <div class="row text-right op-7">
+                        <div class="col px-1">
+                          <i class="ion-connection-bars icon-1x"></i>
+                          <span class="d-block text-sm">${survey.numResponses} Responses</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>`);
   }
 
 
   updateList() {
     console.log("update list");
-    console.log(`Num quotes = ${rhit.fbMovieQuotesManager.length}`);
+    console.log(`Num quotes = ${rhit.surveysManager.length}`);
     console.log(
       "Example quote = ",
-      rhit.fbMovieQuotesManager.getMovieQuoteAtIndex(0)
+      rhit.surveysManager.getSurveyAtIndex(0)
     );
 
     // Make a new quoteListContainer
-    const newList = htmlToElement('<div id="quoteListContainer"></div>');
+    const newList = htmlToElement('<div id="surveyColumn">');
     // Fill
-    for (let i = 0; i < rhit.fbMovieQuotesManager.length; i++) {
-      const mq = rhit.fbMovieQuotesManager.getMovieQuoteAtIndex(i);
-      const newCard = this._createCard(mq);
+    for (let i = 0; i < rhit.surveysManager.length; i++) {
+      const survey = rhit.surveysManager.getSurveyAtIndex(i);
+      const newCard = this._createCard(survey);
 
-      newCard.onclick = (event) => {
-        // rhit.storage.setMovieQuoteId(mq.id);
+      // newCard.onclick = (event) => {
+      //   // rhit.storage.setMovieQuoteId(mq.id);
 
-        window.location.href = `/moviequote.html?id=${mq.id}`;
-      };
+      //   window.location.href = `/moviequote.html?id=${mq.id}`;
+      // };
 
       newList.appendChild(newCard);
     }
 
     // Remove old
-    const oldList = document.querySelector("#quoteListContainer");
+    const oldList = document.querySelector("#surveyColumn");
     oldList.removeAttribute("id");
     oldList.hidden = true;
     // Put in new
@@ -89,18 +105,13 @@ rhit.Question = class {
   }
 };
 
-rhit.SingleSurveyManager = class {
-  constructor(questions) {
-    this.questions = questions;
+rhit.Survey = class {
+  constructor(id, name, author, responses) {
+    this.id = id;
+    this.name = name;
+    this.author = author;
+    this.numResponses = responses;
   }
-  getAnswers() {
-
-  }
-
-  addQuestion() {
-
-  }
-  
 };
 
 rhit.ResultsController = class {
@@ -112,22 +123,49 @@ rhit.ResultsController = class {
   }
 };
 
-rhit.SurveysController = class {
-  constructor(user, surveys) {
-    this.user = user
-    this.surveys = surveys;
+rhit.SurveysManager = class {
+  constructor(uid) {
+    this._uid = uid;
+    this._documentSnapshots = [];
+    this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_SURVEYS);
+    this._unsubscribe = null;
   }
-  createCard() {
+  add(name, author, questions) {
+    // add quote
+  }
+  beginListening(changeListener) {
+    let query = this._ref.orderBy(rhit.FB_KEY_TIME_POSTED, "desc").limit(50);
 
-  }
-  updateSurvey() {
+    if (this._uid) {
+      query = query.where(rhit.FB_KEY_AUTHOR, "==", this._uid);
+    }
 
-  }
-  getSruveyAtIndex() {
+    this._unsubscribe = query.onSnapshot((querySnapshot) => {
+      // querySnapshot.forEach((doc) => {
+      //     console.log(doc.data());
+      // });
 
+      this._documentSnapshots = querySnapshot.docs;
+      changeListener();
+    });
   }
-  addSurvey() {
-    
+  stopListening() {
+    this._unsubscribe();
+  }
+  //  update(id, quote, movie) {    }
+  //  delete(id) { }
+  get length() {
+    return this._documentSnapshots.length;
+  }
+  getSurveyAtIndex(index) {
+    const docSnapshot = this._documentSnapshots[index];
+    const survey = new rhit.Survey(
+      docSnapshot.id,
+      docSnapshot.get(rhit.FB_KEY_NAME),
+      docSnapshot.get(rhit.FB_KEY_AUTHOR),
+      docSnapshot.get(rhit.FB_KEY_RESPONSES)
+    );
+    return survey;
   }
 };
 
@@ -193,11 +231,11 @@ rhit.checkForRedirects = function () {
 
 rhit.initializePage = function () {
   const urlParams = new URLSearchParams(window.location.search);
-  // if (document.querySelector("#listPage")) {
-  //   const uid = urlParams.get("uid");
-  //   rhit.fbMovieQuotesManager = new rhit.FbMovieQuotesManager(uid);
-  //   new rhit.ListPageController();
-  // }
+  if (document.querySelector("#listPage")) {
+    const uid = urlParams.get("uid");
+    rhit.surveysManager = new rhit.SurveysManager(uid);
+    new rhit.MainMenuController();
+  }
 
   // if (document.querySelector("#detailPage")) {
   //   // const movieQuoteId = rhit.storage.getMovieQuoteId();
@@ -215,10 +253,6 @@ rhit.initializePage = function () {
 
   if (document.querySelector("#loginPage")) {
     new rhit.LoginController();
-  }
-
-  if (document.querySelector("#listPage")) {
-    new rhit.MainMenuController();
   }
 };
 
