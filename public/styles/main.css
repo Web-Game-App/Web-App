@@ -27,6 +27,17 @@ body {
     border-radius: 5px;
 }
 
+#toSurveys,
+#toResults {
+  display: block;
+  margin: 250px auto;
+  color: white;
+  background: #800000;
+  font-size: 4em;
+  padding: 10px 30px;
+  border-radius: 5px;
+}
+
 #surveysPageButton,
 #resultsPageButton {
   display: block;
