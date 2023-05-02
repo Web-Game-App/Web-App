@@ -104,6 +104,9 @@ a{
 .list-group>button {
   text-transform: none;
 }
+.bmd-layout-content {
+  height: 100vh;
+}
 
 @media (min-width: 992px) {
   .row {
