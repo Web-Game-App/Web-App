@@ -20,7 +20,12 @@ function htmlToElement(html) {
 
 rhit.MainMenuController = class {
   constructor() {
-    
+    document.querySelector("#surveysPageButton").addEventListener("click", (event) => {
+			window.location.href = "/surveysPage.html";
+		});
+    document.querySelector("#resultssPageButton").addEventListener("click", (event) => {
+			window.location.href = "/resultsPage.html";
+		});
   }
 
 
@@ -177,6 +182,7 @@ rhit.initializePage = function () {
 /** function and class syntax examples */
 rhit.main = function () {
   console.log("Ready");
+  new rhit.MainMenuController();
   rhit.fbAuthManager = new rhit.FbAuthManager();
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
