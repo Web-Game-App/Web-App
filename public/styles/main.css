@@ -114,3 +114,49 @@ a{
   }
  }
 
+
+ /* Styling form-control Class */
+ .form-control {
+  text-align: left;
+  margin-bottom: 25px;
+}
+
+/* Styling form-control Label */
+.form-control label {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+/* Styling form-control input,
+        select, textarea */
+        .form-control input,
+        .form-control select,
+        .form-control textarea {
+            border: 1px solid #777;
+            border-radius: 2px;
+            font-family: inherit;
+            padding: 10px;
+            display: block;
+            width: 95%;
+        }
+
+ /* Styling Button */
+ #makeSurveySubmit {
+  background-color: #800000;
+  border: 1px solid #777;
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 21px;
+  display: block;
+  width: 100%;
+  margin-top: 50px;
+  margin-bottom: 10px;
+  color: white ;
+}
+
+
+ 
+        
+        
+
+

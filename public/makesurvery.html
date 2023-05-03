@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
+    />
+    <link rel="stylesheet" href="styles/bootstrap-material-design.min.css" />
+    <link
+      href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/main.css" />
+    <title>Make Surveys</title>
+
+    
+
+  </head>
+  
+<body>
+   
+  <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
+    <header class="bmd-layout-header">
+      <div
+        class="navbar navbar-dark bg-faded fixed-top justify-content-start"
+      >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="drawer"
+          data-target="#dw-s2"
+        >
+          <span class="sr-only">Toggle drawer</span>
+          <i class="material-icons">menu</i>
+        </button>
+        <a class="navbar-brand" href="/list.html">&nbsp;&nbsp;Rose Surveys</a>
+      </div>
+    </header>
+    <div id="dw-s2" class="bmd-layout-drawer bg-faded">
+      <header>
+        <a class="navbar-brand">Rose Surveys</a>
+      </header>
+      <ul class="list-group">
+        <button
+          id="menuShowAllSurveys"
+          type="button"
+          class="btn list-group-item"
+        >
+          <i class="material-icons">people_alt</i>Show All Surveys
+        </button>
+        <button
+          id="menuShowMySurveys"
+          type="button"
+          class="btn list-group-item"
+        >
+          <i class="material-icons">person</i>Show my Surveys
+        </button>
+        <button id="menuSignOut" type="button" class="btn list-group-item">
+          <i class="material-icons">logout</i>Sign Out
+        </button>
+      </ul>
+    </div>
+
+  <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay"> 
+
+    <h1>Make your own survery Survey Form</h1>
+  
+    <!-- Create Form -->
+    <form id="form">
+ 
+        <!-- Details -->
+        <div class="form-control">
+            <label for="name" id="label-name">
+                Title            </label>
+ 
+            <!-- Input Type Text -->
+            <input type="text"
+                   id="name"
+                   placeholder="Enter survey title" />
+        </div>
+  
+       
+ 
+    
+  
+    
+ 
+            
+        <div class="form-control">
+            <label for="role" id="label-role">
+               How many questions?
+            </label>
+             
+            <!-- Dropdown options -->
+            <select name="role" id="role">
+                <option value="student">1</option>
+                <option value="intern">2</option>
+                <option value="professional">3</option>
+                <option value="other">4</option>
+                <option value="student">5</option>
+                <option value="intern">6</option>
+                <option value="professional">7</option>
+                <option value="other">8</option>
+                <option value="student">9</option>
+                <option value="intern">10</option>
+                   </select>
+        </div>
+  
+        <!-- Multi-line Text Input Control -->
+        <button type="submit" value="submit" id="makeSurveySubmit" class="btn btn-primary">
+            Submit
+        </button>
+
+    
+    </form>
+
+  </div> 
+
+
+
+
+    
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/popper.js"></script>
+    <script src="scripts/bootstrap-material-design.js"></script>
+    <script>
+      $("body").bootstrapMaterialDesign();
+    </script>
+    <script src="/__/firebase/7.18.0/firebase-app.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/init.js"></script>
+    <script src="scripts/rosefire.min.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+  
+</html>
