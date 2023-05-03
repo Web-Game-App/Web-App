@@ -67,12 +67,7 @@ rhit.MainMenuController = class {
 
 
   updateList() {
-    console.log("update list");
-    console.log(`Num quotes = ${rhit.surveysManager.length}`);
-    console.log(
-      "Example quote = ",
-      rhit.surveysManager.getSurveyAtIndex(0)
-    );
+    
 
     // Make a new quoteListContainer
     const newList = htmlToElement('<div id="surveyColumn">');
