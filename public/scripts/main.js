@@ -34,7 +34,7 @@ rhit.MainMenuController = class {
       rhit.fbAuthManager.signOut();
     };
 
-     rhit.surveysManager.beginListening(this.updateList.bind(this));
+    rhit.surveysManager.beginListening(this.updateList.bind(this));
   }
 
   _createCard(survey) {
@@ -57,7 +57,7 @@ rhit.MainMenuController = class {
                       <div class="row text-right op-7">
                         <div class="col px-1">
                           <i class="ion-connection-bars icon-1x"></i>
-                          <span class="d-block text-sm">${survey.numResponses} Responses</span>
+                          <span class="d-block text-sm">${survey.responses.length} Responses</span>
                         </div>
                       </div>
                     </div>
@@ -65,10 +65,7 @@ rhit.MainMenuController = class {
                 </div>`);
   }
 
-
   updateList() {
-    
-
     // Make a new quoteListContainer
     const newList = htmlToElement('<div id="surveyColumn">');
     // Fill
@@ -95,17 +92,144 @@ rhit.MainMenuController = class {
 };
 
 rhit.Question = class {
-  constructor() {
-    
+  constructor() {}
+};
+
+rhit.SurveyDisplayManager = class {
+  constructor(questionNum) {
+    this.questionNum = parseInt(questionNum);
+    // document.querySelector("#menuSignOut").onclick = (event) => {
+    //   rhit.fbAuthManager.signOut();
+    // };
+    document.querySelector("#nextButton").onclick = (event) => {
+      var selected = document.querySelector('input[name="option"]:checked');
+      rhit.singleSurveyManager.add(selected, questionNum);
+      window.location.href = `/question.html?id=${
+        rhit.singleSurveyManager.id
+      }&num=${parseInt(questionNum) + 1}`;
+    };
+    document.querySelector("#previousButton").onclick = (event) => {
+      window.location.href = `/question.html?id=${
+        rhit.singleSurveyManager.id
+      }&num=${questionNum - 1}`;
+    };
+
+    rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
+  }
+  updateView() {
+    document.querySelector("#surveyName").innerHTML =
+      rhit.singleSurveyManager.name;
+    document.querySelector("#questionTitle").innerHTML =
+      rhit.singleSurveyManager.getQuestionAtIndex(
+        this.questionNum
+      ).questionTitle;
+    document.querySelector("#questionIndex").innerHTML = `Question ${
+      this.questionNum + 1
+    } of ${rhit.singleSurveyManager.numQuestions}`;
+
+    if (this.questionNum == 0) {
+      document.querySelector("#previousButton").style.visibility = "hidden";
+    }
+
+    if (this.questionNum + 1 == rhit.singleSurveyManager.numQuestions) {
+      document.querySelector(
+        "#nextButton"
+      ).innerHTML = `Submit&nbsp;<i class="material-icons">chevron_right</i>`;
+    } else {
+      document.querySelector(
+        "#nextButton"
+      ).innerHTML = `Next&nbsp;<i class="material-icons">chevron_right</i>`;
+    }
+    const question = rhit.singleSurveyManager.getQuestionAtIndex(
+      this.questionNum
+    );
+    for (let i = 0; i < question.options.length; i++) {
+      const optionsContainer = document.querySelector("#optionsContainer");
+      optionsContainer.appendChild(htmlToElement(`<div class="form-check">
+  <input class="form-check-input" type="radio" name="option" id="${question.options[i]}">
+  <label class="form-check-label" for="${question.options[i]}">
+    ${question.options[i]}
+  </label>
+</div>`));
+    }
   }
 };
+
+rhit.SingleSurveyManager = class {
+  constructor(id) {
+    this.id = id;
+    this._documentSnapshot = {};
+    this._unsubscribe = null;
+    this._ref = firebase
+      .firestore()
+      .collection(rhit.FB_COLLECTION_SURVEYS)
+      .doc(id);
+    this.response = [];
+  }
+  beginListening(changeListener) {
+    this._unsubscribe = this._ref.onSnapshot((doc) => {
+      if (doc.exists) {
+        console.log("Document data:", doc.data());
+        this._documentSnapshot = doc;
+        changeListener();
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    });
+  }
+  stopListening() {
+    this._unsubscribe();
+  }
+  delete() {
+    return this._ref.delete();
+  }
+  add(response, questionNum) {
+    if (this.response[questionNum]) {
+      this.response[questionNum] = response;
+      console.log(response);
+      return;
+    }
+    this.response.push(response)
+    console.log(this.response);
+  }
+  getQuestionAtIndex(index) {
+    const questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
+    return questions[index];
+  }
+  // get id() {
+  //   return this.id;
+  // }
+  get name() {
+    return this._documentSnapshot.get(rhit.FB_KEY_NAME);
+  }
+  get author() {
+    return this._documentSnapshot.get(rhit.FB_KEY_AUTHOR);
+  }
+  get numQuestions() {
+    return this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS).length;
+  }
+};
+
+// rhit.storage = rhit.storage || {};
+// rhit.storage.MOVIEQUOTE_ID_KEY = "movieQuoteId";
+// rhit.storage.getMovieQuoteId = function () {
+//   const mqId = sessionStorage.getItem(rhit.storage.MOVIEQUOTE_ID_KEY);
+//   if (!mqId) {
+//     console.log("No movie quote id in sessionStorage");
+//   }
+//   return mqId;
+// };
+// rhit.storage.setMovieQuoteId = function (movieQuoteId) {
+//   sessionStorage.setItem(rhit.storage.MOVIEQUOTE_ID_KEY, movieQuoteId);
+// };
 
 rhit.Survey = class {
   constructor(id, name, author, responses) {
     this.id = id;
     this.name = name;
     this.author = author;
-    this.numResponses = responses;
+    this.responses = responses;
   }
 };
 
@@ -253,6 +377,22 @@ rhit.initializePage = function () {
 
   if (document.querySelector("#loginPage")) {
     new rhit.LoginController();
+  }
+
+  if (document.querySelector("#questionPage")) {
+    const id = urlParams.get("id");
+    let questionNum = urlParams.get("num");
+
+    if (!id) {
+      window.location.href = "/";
+    }
+
+    if (!questionNum) {
+      questionNum = 0;
+    }
+
+    rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
+    new rhit.SurveyDisplayManager(questionNum);
   }
 };
 
