@@ -110,11 +110,16 @@ rhit.Survey = class {
 };
 
 rhit.ResultsController = class {
-  constructor(results) {
-    this.results = results;
+  constructor() {
+    var questionResults = ""; //Insert Question.data in an array
+    this.chart = anychart.pie();
+    this.chart.title("Inert Question Here");
+    this.chart.data(questionResults);
+    this.chart.container("#resultsPage");
+    this.chart.draw();
   }
-  getResultsofSurvey() {
-
+  _createResults() {
+    return htmlToElement();
   }
 };
 
