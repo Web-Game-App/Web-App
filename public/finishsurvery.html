@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+
+
+<head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
+    />
+    <link rel="stylesheet" href="styles/bootstrap-material-design.min.css" />
+    <link
+      href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles/main.css" />
+    <title>Finish making Surveys</title>
+
+    
+
+  </head> 
+
+  <body> 
+    <body>
+      <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
+        <header class="bmd-layout-header">
+          <div
+            class="navbar navbar-dark bg-faded fixed-top justify-content-start"
+          >
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="drawer"
+              data-target="#dw-s2"
+            >
+              <span class="sr-only">Toggle drawer</span>
+              <i class="material-icons">menu</i>
+            </button>
+            <a class="navbar-brand" href="/list.html">&nbsp;&nbsp;Rose Surveys</a>
+          </div>
+        </header>
+        <div id="dw-s2" class="bmd-layout-drawer bg-faded">
+          <header>
+            <a class="navbar-brand">Rose Surveys</a>
+          </header>
+          <ul class="list-group">
+            <button
+              id="menuShowAllSurveys"
+              type="button"
+              class="btn list-group-item"
+            >
+              <i class="material-icons">people_alt</i>Show All Surveys
+            </button>
+            <button
+              id="menuShowMySurveys"
+              type="button"
+              class="btn list-group-item"
+            >
+              <i class="material-icons">person</i>Show my Surveys
+            </button>
+            <button id="menuSignOut" type="button" class="btn list-group-item">
+              <i class="material-icons">logout</i>Sign Out
+            </button>
+          </ul>
+        </div>
+        
+        <div id="finishSurvey" class="bmd-layout-content">
+       
+          <br> 
+          <br> 
+          <br> 
+      
+
+          <div class="form-outline">
+            <input type="text" id="formControlLg" class="form-control form-control-lg" />
+            <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label>
+          
+          </div>
+
+          <button type="button" class="btn btn-primary" value="Submit"> Add Answer</button> 
+          
+          
+
+        
+      </div> 
+      </div>
+
+
+        
+
+
+
+
+
+
+
+
+
+      <script src="scripts/jquery.min.js"></script>
+      <script src="scripts/popper.js"></script>
+      <script src="scripts/bootstrap-material-design.js"></script>
+      <script>
+        $("body").bootstrapMaterialDesign();
+      </script>
+      <script src="/__/firebase/7.18.0/firebase-app.js"></script>
+      <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+      <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
+      <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
+      <script src="/__/firebase/init.js"></script>
+      <script src="scripts/rosefire.min.js"></script>
+      <script src="scripts/main.js"></script> 
+
+
+  </body>
+
+
+
+</html> 
+
+

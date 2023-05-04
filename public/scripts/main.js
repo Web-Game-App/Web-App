@@ -11,6 +11,8 @@ rhit.singleSurveyManager = null;
 rhit.surveysManager = null;
 rhit.resultsManager = null;
 rhit.fbAuthManager = null;
+rhit.mainMenuController = null; 
+rhit.makeSurvey = null; 
 
 // From: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
 function htmlToElement(html) {
@@ -23,7 +25,7 @@ function htmlToElement(html) {
 rhit.MainMenuController = class {
   constructor() {
     document.querySelector("#menuShowAllSurveys").onclick = (event) => {
-      window.location.href = "/list.html";
+      window.location.href = "http://127.0.0.1:3000/public/list.html";
     };
 
     document.querySelector("#menuShowMySurveys").onclick = (event) => {
@@ -33,6 +35,17 @@ rhit.MainMenuController = class {
     document.querySelector("#menuSignOut").onclick = (event) => {
       rhit.fbAuthManager.signOut();
     };
+
+    document.querySelector("#makeSurveySubmit").onclick = (event) => { 
+
+      
+
+      window.location.href = "http://127.0.0.1:3000/public/finishsurvery.html";
+      
+
+      
+
+    }; 
 
      rhit.surveysManager.beginListening(this.updateList.bind(this));
   }
@@ -108,6 +121,49 @@ rhit.Survey = class {
     this.numResponses = responses;
   }
 };
+
+
+rhit.MakeSurvey = class { 
+
+  constructor() { 
+
+
+  }
+
+  getData(){ 
+ 
+    //Make new Questions 
+    const newQuestionsField = htmlToElement(' <main class="bmd-layout-content" id="finishSurvey"> </main>'); 
+
+
+    //Fill 
+    var num = document.getElementById('numQuestions').value;
+
+    var target = document.getElementById('finishSurvey'); 
+
+    
+      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
+      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
+      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
+      
+
+
+
+
+    
+    
+
+
+
+
+  } 
+
+
+  
+
+
+
+}
 
 rhit.ResultsController = class {
   constructor(results) {
@@ -256,6 +312,8 @@ rhit.initializePage = function () {
 rhit.main = function () {
   console.log("Ready");
   rhit.fbAuthManager = new rhit.FbAuthManager();
+  rhit.mainMenuController = new rhit.MainMenuController(); 
+  rhit.makeSurvey = rhit.MakeSurvey(); 
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
