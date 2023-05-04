@@ -114,6 +114,9 @@ a{
   }
  }
 
+ #optionsContainer {
+  margin: 20px;
+ }
 
  /* Styling form-control Class */
  .form-control {
