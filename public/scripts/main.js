@@ -11,8 +11,7 @@ rhit.singleSurveyManager = null;
 rhit.surveysManager = null;
 rhit.resultsManager = null;
 rhit.fbAuthManager = null;
-rhit.mainMenuController = null; 
-rhit.makeSurvey = null; 
+rhit.makeSurvey = null;
 
 // From: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
 function htmlToElement(html) {
@@ -25,7 +24,7 @@ function htmlToElement(html) {
 rhit.MainMenuController = class {
   constructor() {
     document.querySelector("#menuShowAllSurveys").onclick = (event) => {
-      window.location.href = "http://127.0.0.1:3000/public/list.html";
+      window.location.href = "/list.html";
     };
 
     document.querySelector("#menuShowMySurveys").onclick = (event) => {
@@ -38,40 +37,31 @@ rhit.MainMenuController = class {
 
     document.querySelector("#makeSurveySubmit").onclick = (event) => { 
 
-      rhit.makeSurvey.getData(); 
       
-     
+
+      window.location.href = "http://127.0.0.1:3000/public/finishsurvery.html";
       
-       
-
-
-
 
       
 
-    };
+    }; 
 
-
-    
-    
-
-    
-
-
-
-
-     rhit.surveysManager.beginListening(this.updateList.bind(this));
+    //  rhit.surveysManager.beginListening(this.updateList.bind(this));
     rhit.surveysManager.beginListening(this.updateList.bind(this));
   }
 
   _createCard(survey) {
+    let link = `/question.html?id=${survey.id}`;
+    if (survey.author == rhit.fbAuthManager.uid) {
+      link = `resultsPage.html?id=${survey.id}`;
+    }
     return htmlToElement(`<div
                   class="card row-hover pos-relative py-3 px-3 mb-3 border-warning border-top-0 border-right-0 border-bottom-0 rounded-0"
                 >
                   <div class="row align-items-center">
                     <div class="col-md-8 mb-3 mb-sm-0">
                       <h5>
-                        <a href="/question.html?id=${survey.id}" class="text-primary"
+                        <a href="${link}" class="text-primary"
                           >${survey.name}</a
                         >
                       </h5>
@@ -84,7 +74,7 @@ rhit.MainMenuController = class {
                       <div class="row text-right op-7">
                         <div class="col px-1">
                           <i class="ion-connection-bars icon-1x"></i>
-                          <span class="d-block text-sm">${survey.responses.length} Responses</span>
+                          <span class="d-block text-sm">${survey.responses} Responses</span>
                         </div>
                       </div>
                     </div>
@@ -93,13 +83,17 @@ rhit.MainMenuController = class {
   }
 
   updateList() {
+    if (document.querySelector("#numSurveys")) {
+    document.querySelector("#numSurveys").innerHTML = rhit.surveysManager.length;
+    document.querySelector("#numResponses").innerHTML = rhit.surveysManager.totalResponses;
+  }
     // Make a new quoteListContainer
     const newList = htmlToElement('<div id="surveyColumn">');
     // Fill
     for (let i = 0; i < rhit.surveysManager.length; i++) {
       const survey = rhit.surveysManager.getSurveyAtIndex(i);
       const newCard = this._createCard(survey);
-
+      
       // newCard.onclick = (event) => {
       //   // rhit.storage.setMovieQuoteId(mq.id);
 
@@ -130,10 +124,20 @@ rhit.SurveyDisplayManager = class {
     // };
     document.querySelector("#nextButton").onclick = (event) => {
       var selected = document.querySelector('input[name="option"]:checked');
-      rhit.singleSurveyManager.add(selected, questionNum);
-      window.location.href = `/question.html?id=${
-        rhit.singleSurveyManager.id
-      }&num=${parseInt(questionNum) + 1}`;
+      if (selected) {
+      rhit.storage.addResponse(selected.value, questionNum);
+    }
+      if (!selected) {
+        // const myModal = new bootstrap.Modal(document.getElementById('errorModal'))
+        $('#errorModal').modal('show')
+      }
+      else if (this.questionNum + 1 == rhit.singleSurveyManager.numQuestions) {
+        rhit.singleSurveyManager.addResponses(rhit.storage.getResponse());
+      } else {
+        window.location.href = `/question.html?id=${
+          rhit.singleSurveyManager.id
+        }&num=${parseInt(questionNum) + 1}`;
+      }
     };
     document.querySelector("#previousButton").onclick = (event) => {
       window.location.href = `/question.html?id=${
@@ -170,14 +174,17 @@ rhit.SurveyDisplayManager = class {
     const question = rhit.singleSurveyManager.getQuestionAtIndex(
       this.questionNum
     );
+    const optionsContainer = document.querySelector("#optionsContainer");
+    optionsContainer.replaceChildren();
     for (let i = 0; i < question.options.length; i++) {
-      const optionsContainer = document.querySelector("#optionsContainer");
-      optionsContainer.appendChild(htmlToElement(`<div class="form-check">
-  <input class="form-check-input" type="radio" name="option" id="${question.options[i]}">
+      optionsContainer.appendChild(
+        htmlToElement(`<div class="form-check">
+  <input class="form-check-input" type="radio" value="${question.options[i]}" name="option" id="${question.options[i]}">
   <label class="form-check-label" for="${question.options[i]}">
     ${question.options[i]}
   </label>
-</div>`));
+</div>`)
+      );
     }
   }
 };
@@ -205,20 +212,40 @@ rhit.SingleSurveyManager = class {
       }
     });
   }
+  addResponses(responseArray) {
+    let questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
+    let numResponses = this._documentSnapshot.get(rhit.FB_KEY_RESPONSES);
+    numResponses++;
+    for (let i = 0; i < questions.length; i++) {
+      console.log(questions[i]);
+      let responses = questions[i].responses;
+      const newResponseNumber = responses[responseArray[i]] + 1;
+      responses[responseArray[i]] = newResponseNumber;
+      questions[i].responses = responses;
+    }
+    console.log(questions);
+    this._ref
+      .set(
+        {
+          questions: questions,
+          responses: numResponses,
+        },
+        { merge: true }
+      )
+      .then(() => {
+        console.log("Document successfully written!");
+        sessionStorage.clear();
+        window.location.href = `/list.html`;
+      })
+      .catch((error) => {
+        console.error("Error writing document: ", error);
+      });
+  }
   stopListening() {
     this._unsubscribe();
   }
   delete() {
     return this._ref.delete();
-  }
-  add(response, questionNum) {
-    if (this.response[questionNum]) {
-      this.response[questionNum] = response;
-      console.log(response);
-      return;
-    }
-    this.response.push(response)
-    console.log(this.response);
   }
   getQuestionAtIndex(index) {
     const questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
@@ -236,20 +263,39 @@ rhit.SingleSurveyManager = class {
   get numQuestions() {
     return this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS).length;
   }
+  get results() {
+    const questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
+    let results = [];
+    for (let i = 0; i < questions.length; i++) {
+      let singleResult = [];
+      for (const response in questions[i].responses) {
+        singleResult.push({x: response, value: questions[i].responses[response]});
+      }
+      results.push(singleResult);
+    }
+    return results;
+  }
 };
 
-// rhit.storage = rhit.storage || {};
-// rhit.storage.MOVIEQUOTE_ID_KEY = "movieQuoteId";
-// rhit.storage.getMovieQuoteId = function () {
-//   const mqId = sessionStorage.getItem(rhit.storage.MOVIEQUOTE_ID_KEY);
-//   if (!mqId) {
-//     console.log("No movie quote id in sessionStorage");
-//   }
-//   return mqId;
-// };
-// rhit.storage.setMovieQuoteId = function (movieQuoteId) {
-//   sessionStorage.setItem(rhit.storage.MOVIEQUOTE_ID_KEY, movieQuoteId);
-// };
+rhit.storage = rhit.storage || {};
+rhit.storage.getResponse = function () {
+  const response = sessionStorage.getItem("response");
+  if (!response) {
+    console.log("No movie quote id in sessionStorage");
+  }
+  return JSON.parse(response);
+};
+rhit.storage.addResponse = function (responseToAdd, num) {
+  let response = rhit.storage.getResponse();
+  console.log(response);
+  if (!response) {
+    response = [];
+  }
+  // response.push(responseToAdd);
+  response[parseInt(num)] = responseToAdd;
+  const jsonArray = JSON.stringify(response);
+  sessionStorage.setItem("response", jsonArray);
+};
 
 rhit.Survey = class {
   constructor(id, name, author, responses) {
@@ -260,7 +306,6 @@ rhit.Survey = class {
   }
 };
 
-
 rhit.MakeSurvey = class { 
 
   constructor() { 
@@ -270,32 +315,26 @@ rhit.MakeSurvey = class {
 
   getData(){ 
  
-    let num = document.getElementById('nummQuestions').value;
-
-      console.log(num);
-
-       
+    //Make new Questions 
+    const newQuestionsField = htmlToElement(' <main class="bmd-layout-content" id="finishSurvey"> </main>'); 
 
 
+    //Fill 
+    var num = document.getElementById('numQuestions').value;
 
-       var target = document.getElementById('finishSurvey'); 
-   
-       target.innerHTML = '<br> <br> <br>';   
+    var target = document.getElementById('finishSurvey'); 
 
-
-
-       for(let  i = 0; i < num; i++){ 
-
+    
       target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      
-     
+      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
+      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
       
 
 
 
 
     
-    }
+    
 
 
 
@@ -311,11 +350,16 @@ rhit.MakeSurvey = class {
 
 rhit.ResultsController = class {
   constructor() {
-    var questionResults = ""; //Insert Question.data in an array
+    rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
+    
+  }
+  updateView() {
+    const questionResults = rhit.singleSurveyManager.results; //Insert Question.data in an array
+    console.log(questionResults);
     this.chart = anychart.pie();
     this.chart.title("Inert Question Here");
-    this.chart.data(questionResults);
-    this.chart.container("#resultsPage");
+    this.chart.data(questionResults[0]);
+    this.chart.container("resultsPage");
     this.chart.draw();
   }
   _createResults() {
@@ -356,6 +400,13 @@ rhit.SurveysManager = class {
   //  delete(id) { }
   get length() {
     return this._documentSnapshots.length;
+  }
+  get totalResponses() {
+    let total = 0;
+    for (let i = 0; i < this._documentSnapshots.length; i++) {
+      total += this._documentSnapshots[i].get(rhit.FB_KEY_RESPONSES);
+    }
+    return total;
   }
   getSurveyAtIndex(index) {
     const docSnapshot = this._documentSnapshots[index];
@@ -465,10 +516,22 @@ rhit.initializePage = function () {
 
     if (!questionNum) {
       questionNum = 0;
+      sessionStorage.clear();
     }
 
     rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
     new rhit.SurveyDisplayManager(questionNum);
+  }
+
+  if (document.querySelector("#resultsPage")) {
+    const id = urlParams.get("id");
+
+    if (!id) {
+      window.location.href = "/";
+    }
+
+    rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
+    new rhit.ResultsController();
   }
 };
 
@@ -479,6 +542,7 @@ rhit.main = function () {
   rhit.makeSurvey = new rhit.MakeSurvey(); 
   rhit.fbAuthManager = new rhit.FbAuthManager();
   rhit.mainMenuController = new rhit.MainMenuController(); 
+  rhit.makeSurvey = rhit.MakeSurvey(); 
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
