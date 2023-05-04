@@ -38,14 +38,27 @@ rhit.MainMenuController = class {
 
     document.querySelector("#makeSurveySubmit").onclick = (event) => { 
 
+      rhit.makeSurvey.getData(); 
+      
+     
+      
+       
+
+
+
+
       
 
-      window.location.href = "http://127.0.0.1:3000/public/finishsurvery.html";
-      
+    };
 
-      
 
-    }; 
+    
+    
+
+    
+
+
+
 
      rhit.surveysManager.beginListening(this.updateList.bind(this));
     rhit.surveysManager.beginListening(this.updateList.bind(this));
@@ -257,26 +270,32 @@ rhit.MakeSurvey = class {
 
   getData(){ 
  
-    //Make new Questions 
-    const newQuestionsField = htmlToElement(' <main class="bmd-layout-content" id="finishSurvey"> </main>'); 
+    let num = document.getElementById('nummQuestions').value;
+
+      console.log(num);
+
+       
 
 
-    //Fill 
-    var num = document.getElementById('numQuestions').value;
 
-    var target = document.getElementById('finishSurvey'); 
+       var target = document.getElementById('finishSurvey'); 
+   
+       target.innerHTML = '<br> <br> <br>';   
 
-    
+
+
+       for(let  i = 0; i < num; i++){ 
+
       target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
+      
+     
       
 
 
 
 
     
-    
+    }
 
 
 
@@ -457,9 +476,9 @@ rhit.initializePage = function () {
 /** function and class syntax examples */
 rhit.main = function () {
   console.log("Ready");
+  rhit.makeSurvey = new rhit.MakeSurvey(); 
   rhit.fbAuthManager = new rhit.FbAuthManager();
   rhit.mainMenuController = new rhit.MainMenuController(); 
-  rhit.makeSurvey = rhit.MakeSurvey(); 
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
