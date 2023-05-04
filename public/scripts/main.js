@@ -11,8 +11,7 @@ rhit.singleSurveyManager = null;
 rhit.surveysManager = null;
 rhit.resultsManager = null;
 rhit.fbAuthManager = null;
-rhit.mainMenuController = null; 
-rhit.makeSurvey = null; 
+rhit.makeSurvey = null;
 
 // From: https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
 function htmlToElement(html) {
@@ -25,7 +24,7 @@ function htmlToElement(html) {
 rhit.MainMenuController = class {
   constructor() {
     document.querySelector("#menuShowAllSurveys").onclick = (event) => {
-      window.location.href = "http://127.0.0.1:3000/public/list.html";
+      window.location.href = "/list.html";
     };
 
     document.querySelector("#menuShowMySurveys").onclick = (event) => {
@@ -35,19 +34,14 @@ rhit.MainMenuController = class {
     document.querySelector("#menuSignOut").onclick = (event) => {
       rhit.fbAuthManager.signOut();
     };
+    if (document.querySelector("#makeSurveySubmit")) {
+      document.querySelector("#makeSurveySubmit").onclick = (event) => {
+        window.location.href =
+          "http://127.0.0.1:3000/public/finishsurvery.html";
+      };
+    }
 
-    document.querySelector("#makeSurveySubmit").onclick = (event) => { 
-
-      
-
-      window.location.href = "http://127.0.0.1:3000/public/finishsurvery.html";
-      
-
-      
-
-    }; 
-
-     rhit.surveysManager.beginListening(this.updateList.bind(this));
+    //  rhit.surveysManager.beginListening(this.updateList.bind(this));
     rhit.surveysManager.beginListening(this.updateList.bind(this));
   }
 
@@ -80,6 +74,10 @@ rhit.MainMenuController = class {
   }
 
   updateList() {
+    if (document.querySelector("#numSurveys")) {
+    document.querySelector("#numSurveys").innerHTML = rhit.surveysManager.length;
+    document.querySelector("#numResponses").innerHTML = rhit.surveysManager.totalResponses;
+  }
     // Make a new quoteListContainer
     const newList = htmlToElement('<div id="surveyColumn">');
     // Fill
@@ -161,8 +159,9 @@ rhit.SurveyDisplayManager = class {
     const question = rhit.singleSurveyManager.getQuestionAtIndex(
       this.questionNum
     );
+    const optionsContainer = document.querySelector("#optionsContainer");
+    optionsContainer.replaceChildren();
     for (let i = 0; i < question.options.length; i++) {
-      const optionsContainer = document.querySelector("#optionsContainer");
       optionsContainer.appendChild(
         htmlToElement(`<div class="form-check">
   <input class="form-check-input" type="radio" value="${question.options[i]}" name="option" id="${question.options[i]}">
@@ -278,48 +277,28 @@ rhit.Survey = class {
   }
 };
 
+rhit.MakeSurvey = class {
+  constructor() {}
 
-rhit.MakeSurvey = class { 
+  getData() {
+    //Make new Questions
+    const newQuestionsField = htmlToElement(
+      ' <main class="bmd-layout-content" id="finishSurvey"> </main>'
+    );
 
-  constructor() { 
+    //Fill
+    var num = document.getElementById("numQuestions").value;
 
+    var target = document.getElementById("finishSurvey");
 
+    target.innerHTML +=
+      '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>';
+    target.innerHTML +=
+      '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>';
+    target.innerHTML +=
+      '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>';
   }
-
-  getData(){ 
- 
-    //Make new Questions 
-    const newQuestionsField = htmlToElement(' <main class="bmd-layout-content" id="finishSurvey"> </main>'); 
-
-
-    //Fill 
-    var num = document.getElementById('numQuestions').value;
-
-    var target = document.getElementById('finishSurvey'); 
-
-    
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      
-
-
-
-
-    
-    
-
-
-
-
-  } 
-
-
-  
-
-
-
-}
+};
 
 rhit.ResultsController = class {
   constructor() {
@@ -368,6 +347,13 @@ rhit.SurveysManager = class {
   //  delete(id) { }
   get length() {
     return this._documentSnapshots.length;
+  }
+  get totalResponses() {
+    let total = 0;
+    for (let i = 0; i < this._documentSnapshots.length; i++) {
+      total += this._documentSnapshots[i].get(rhit.FB_KEY_RESPONSES);
+    }
+    return total;
   }
   getSurveyAtIndex(index) {
     const docSnapshot = this._documentSnapshots[index];
@@ -489,8 +475,7 @@ rhit.initializePage = function () {
 rhit.main = function () {
   console.log("Ready");
   rhit.fbAuthManager = new rhit.FbAuthManager();
-  rhit.mainMenuController = new rhit.MainMenuController(); 
-  rhit.makeSurvey = rhit.MakeSurvey(); 
+  // rhit.makeSurvey = rhit.MakeSurvey();
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
