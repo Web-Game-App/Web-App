@@ -39,7 +39,7 @@ rhit.MainMenuController = class {
 
       
 
-      window.location.href = "http://127.0.0.1:3000/public/finishsurvery.html";
+      rhit.makeSurvey.getData();
       
 
       
@@ -315,21 +315,23 @@ rhit.MakeSurvey = class {
 
   getData(){ 
  
-    //Make new Questions 
-    const newQuestionsField = htmlToElement(' <main class="bmd-layout-content" id="finishSurvey"> </main>'); 
+    
 
 
     //Fill 
-    var num = document.getElementById('numQuestions').value;
+    let num = document.getElementById('nummQuestions').value;
 
     var target = document.getElementById('finishSurvey'); 
 
-    
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-      
+    target.innerHTML = '<br> <br>'; 
 
+    for(let i = 0; i < num; i++){
+      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
+    
+
+
+
+    } 
 
 
 
