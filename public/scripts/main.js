@@ -46,13 +46,17 @@ rhit.MainMenuController = class {
   }
 
   _createCard(survey) {
+    let link = `/question.html?id=${survey.id}`;
+    if (survey.author == rhit.fbAuthManager.uid) {
+      link = `resultsPage.html?id=${survey.id}`;
+    }
     return htmlToElement(`<div
                   class="card row-hover pos-relative py-3 px-3 mb-3 border-warning border-top-0 border-right-0 border-bottom-0 rounded-0"
                 >
                   <div class="row align-items-center">
                     <div class="col-md-8 mb-3 mb-sm-0">
                       <h5>
-                        <a href="/question.html?id=${survey.id}" class="text-primary"
+                        <a href="${link}" class="text-primary"
                           >${survey.name}</a
                         >
                       </h5>
@@ -84,7 +88,7 @@ rhit.MainMenuController = class {
     for (let i = 0; i < rhit.surveysManager.length; i++) {
       const survey = rhit.surveysManager.getSurveyAtIndex(i);
       const newCard = this._createCard(survey);
-
+      
       // newCard.onclick = (event) => {
       //   // rhit.storage.setMovieQuoteId(mq.id);
 
@@ -254,6 +258,18 @@ rhit.SingleSurveyManager = class {
   get numQuestions() {
     return this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS).length;
   }
+  get results() {
+    const questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
+    let results = [];
+    for (let i = 0; i < questions.length; i++) {
+      let singleResult = [];
+      for (const response in questions[i].responses) {
+        singleResult.push({x: response, value: questions[i].responses[response]});
+      }
+      results.push(singleResult);
+    }
+    return results;
+  }
 };
 
 rhit.storage = rhit.storage || {};
@@ -310,11 +326,16 @@ rhit.MakeSurvey = class {
 
 rhit.ResultsController = class {
   constructor() {
-    var questionResults = ""; //Insert Question.data in an array
+    rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
+    
+  }
+  updateView() {
+    const questionResults = rhit.singleSurveyManager.results; //Insert Question.data in an array
+    console.log(questionResults);
     this.chart = anychart.pie();
     this.chart.title("Inert Question Here");
-    this.chart.data(questionResults);
-    this.chart.container("#resultsPage");
+    this.chart.data(questionResults[0]);
+    this.chart.container("resultsPage");
     this.chart.draw();
   }
   _createResults() {
@@ -476,6 +497,17 @@ rhit.initializePage = function () {
 
     rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
     new rhit.SurveyDisplayManager(questionNum);
+  }
+
+  if (document.querySelector("#resultsPage")) {
+    const id = urlParams.get("id");
+
+    if (!id) {
+      window.location.href = "/";
+    }
+
+    rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
+    new rhit.ResultsController();
   }
 };
 
