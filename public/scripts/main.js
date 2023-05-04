@@ -57,7 +57,7 @@ rhit.MainMenuController = class {
                       <div class="row text-right op-7">
                         <div class="col px-1">
                           <i class="ion-connection-bars icon-1x"></i>
-                          <span class="d-block text-sm">${survey.responses.length} Responses</span>
+                          <span class="d-block text-sm">${survey.responses} Responses</span>
                         </div>
                       </div>
                     </div>
@@ -103,10 +103,14 @@ rhit.SurveyDisplayManager = class {
     // };
     document.querySelector("#nextButton").onclick = (event) => {
       var selected = document.querySelector('input[name="option"]:checked');
-      rhit.singleSurveyManager.add(selected, questionNum);
-      window.location.href = `/question.html?id=${
-        rhit.singleSurveyManager.id
-      }&num=${parseInt(questionNum) + 1}`;
+      rhit.storage.addResponse(selected.value);
+      if (this.questionNum + 1 == rhit.singleSurveyManager.numQuestions) {
+        rhit.singleSurveyManager.addResponses(rhit.storage.getResponse());
+      } else {
+        window.location.href = `/question.html?id=${
+          rhit.singleSurveyManager.id
+        }&num=${parseInt(questionNum) + 1}`;
+      }
     };
     document.querySelector("#previousButton").onclick = (event) => {
       window.location.href = `/question.html?id=${
@@ -145,12 +149,14 @@ rhit.SurveyDisplayManager = class {
     );
     for (let i = 0; i < question.options.length; i++) {
       const optionsContainer = document.querySelector("#optionsContainer");
-      optionsContainer.appendChild(htmlToElement(`<div class="form-check">
-  <input class="form-check-input" type="radio" name="option" id="${question.options[i]}">
+      optionsContainer.appendChild(
+        htmlToElement(`<div class="form-check">
+  <input class="form-check-input" type="radio" value="${question.options[i]}" name="option" id="${question.options[i]}">
   <label class="form-check-label" for="${question.options[i]}">
     ${question.options[i]}
   </label>
-</div>`));
+</div>`)
+      );
     }
   }
 };
@@ -178,20 +184,39 @@ rhit.SingleSurveyManager = class {
       }
     });
   }
+  addResponses(responseArray) {
+    let questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
+    let numResponses = this._documentSnapshot.get(rhit.FB_KEY_RESPONSES);
+    numResponses++;
+    for (let i = 0; i < questions.length; i++) {
+      console.log(questions[i]);
+      let responses = questions[i].responses;
+      responses.push(responseArray[i]);
+      questions[i].responses = responses;
+    }
+    console.log(questions);
+    this._ref
+      .set(
+        {
+          questions: questions,
+          responses: numResponses,
+        },
+        { merge: true }
+      )
+      .then(() => {
+        console.log("Document successfully written!");
+        sessionStorage.clear();
+        window.location.href = `/list.html`;
+      })
+      .catch((error) => {
+        console.error("Error writing document: ", error);
+      });
+  }
   stopListening() {
     this._unsubscribe();
   }
   delete() {
     return this._ref.delete();
-  }
-  add(response, questionNum) {
-    if (this.response[questionNum]) {
-      this.response[questionNum] = response;
-      console.log(response);
-      return;
-    }
-    this.response.push(response)
-    console.log(this.response);
   }
   getQuestionAtIndex(index) {
     const questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
@@ -211,18 +236,24 @@ rhit.SingleSurveyManager = class {
   }
 };
 
-// rhit.storage = rhit.storage || {};
-// rhit.storage.MOVIEQUOTE_ID_KEY = "movieQuoteId";
-// rhit.storage.getMovieQuoteId = function () {
-//   const mqId = sessionStorage.getItem(rhit.storage.MOVIEQUOTE_ID_KEY);
-//   if (!mqId) {
-//     console.log("No movie quote id in sessionStorage");
-//   }
-//   return mqId;
-// };
-// rhit.storage.setMovieQuoteId = function (movieQuoteId) {
-//   sessionStorage.setItem(rhit.storage.MOVIEQUOTE_ID_KEY, movieQuoteId);
-// };
+rhit.storage = rhit.storage || {};
+rhit.storage.getResponse = function () {
+  const response = sessionStorage.getItem("response");
+  if (!response) {
+    console.log("No movie quote id in sessionStorage");
+  }
+  return JSON.parse(response);
+};
+rhit.storage.addResponse = function (responseToAdd) {
+  let response = rhit.storage.getResponse();
+  console.log(response);
+  if (!response) {
+    response = [];
+  }
+  response.push(responseToAdd);
+  const jsonArray = JSON.stringify(response);
+  sessionStorage.setItem("response", jsonArray);
+};
 
 rhit.Survey = class {
   constructor(id, name, author, responses) {
