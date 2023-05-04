@@ -210,7 +210,8 @@ rhit.SingleSurveyManager = class {
     for (let i = 0; i < questions.length; i++) {
       console.log(questions[i]);
       let responses = questions[i].responses;
-      responses.push(responseArray[i]);
+      const newResponseNumber = responses[responseArray[i]] + 1;
+      responses[responseArray[i]] = newResponseNumber;
       questions[i].responses = responses;
     }
     console.log(questions);
