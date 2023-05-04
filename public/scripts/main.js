@@ -115,8 +115,14 @@ rhit.SurveyDisplayManager = class {
     // };
     document.querySelector("#nextButton").onclick = (event) => {
       var selected = document.querySelector('input[name="option"]:checked');
-      rhit.storage.addResponse(selected.value);
-      if (this.questionNum + 1 == rhit.singleSurveyManager.numQuestions) {
+      if (selected) {
+      rhit.storage.addResponse(selected.value, questionNum);
+    }
+      if (!selected) {
+        // const myModal = new bootstrap.Modal(document.getElementById('errorModal'))
+        $('#errorModal').modal('show')
+      }
+      else if (this.questionNum + 1 == rhit.singleSurveyManager.numQuestions) {
         rhit.singleSurveyManager.addResponses(rhit.storage.getResponse());
       } else {
         window.location.href = `/question.html?id=${
@@ -257,13 +263,14 @@ rhit.storage.getResponse = function () {
   }
   return JSON.parse(response);
 };
-rhit.storage.addResponse = function (responseToAdd) {
+rhit.storage.addResponse = function (responseToAdd, num) {
   let response = rhit.storage.getResponse();
   console.log(response);
   if (!response) {
     response = [];
   }
-  response.push(responseToAdd);
+  // response.push(responseToAdd);
+  response[parseInt(num)] = responseToAdd;
   const jsonArray = JSON.stringify(response);
   sessionStorage.setItem("response", jsonArray);
 };
@@ -463,6 +470,7 @@ rhit.initializePage = function () {
 
     if (!questionNum) {
       questionNum = 0;
+      sessionStorage.clear();
     }
 
     rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
