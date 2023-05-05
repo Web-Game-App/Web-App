@@ -34,17 +34,11 @@ rhit.MainMenuController = class {
     document.querySelector("#menuSignOut").onclick = (event) => {
       rhit.fbAuthManager.signOut();
     };
-
-    document.querySelector("#makeSurveySubmit").onclick = (event) => { 
-
-      
-
-      rhit.makeSurvey.getData();
-      
-
-      
-
-    }; 
+    if (document.querySelector("#makeSurveySubmit")) {
+      document.querySelector("#makeSurveySubmit").onclick = (event) => {
+        window.location.href = `/makesurvery.html`;
+      };
+    }
 
     //  rhit.surveysManager.beginListening(this.updateList.bind(this));
     rhit.surveysManager.beginListening(this.updateList.bind(this));
@@ -84,16 +78,18 @@ rhit.MainMenuController = class {
 
   updateList() {
     if (document.querySelector("#numSurveys")) {
-    document.querySelector("#numSurveys").innerHTML = rhit.surveysManager.length;
-    document.querySelector("#numResponses").innerHTML = rhit.surveysManager.totalResponses;
-  }
+      document.querySelector("#numSurveys").innerHTML =
+        rhit.surveysManager.length;
+      document.querySelector("#numResponses").innerHTML =
+        rhit.surveysManager.totalResponses;
+    }
     // Make a new quoteListContainer
     const newList = htmlToElement('<div id="surveyColumn">');
     // Fill
     for (let i = 0; i < rhit.surveysManager.length; i++) {
       const survey = rhit.surveysManager.getSurveyAtIndex(i);
       const newCard = this._createCard(survey);
-      
+
       // newCard.onclick = (event) => {
       //   // rhit.storage.setMovieQuoteId(mq.id);
 
@@ -125,13 +121,15 @@ rhit.SurveyDisplayManager = class {
     document.querySelector("#nextButton").onclick = (event) => {
       var selected = document.querySelector('input[name="option"]:checked');
       if (selected) {
-      rhit.storage.addResponse(selected.value, questionNum);
-    }
+        rhit.storage.addResponse(selected.value, questionNum);
+      }
       if (!selected) {
         // const myModal = new bootstrap.Modal(document.getElementById('errorModal'))
-        $('#errorModal').modal('show')
-      }
-      else if (this.questionNum + 1 == rhit.singleSurveyManager.numQuestions) {
+        $("#errorModal").modal("show");
+      } else if (
+        this.questionNum + 1 ==
+        rhit.singleSurveyManager.numQuestions
+      ) {
         rhit.singleSurveyManager.addResponses(rhit.storage.getResponse());
       } else {
         window.location.href = `/question.html?id=${
@@ -269,7 +267,10 @@ rhit.SingleSurveyManager = class {
     for (let i = 0; i < questions.length; i++) {
       let singleResult = [];
       for (const response in questions[i].responses) {
-        singleResult.push({x: response, value: questions[i].responses[response]});
+        singleResult.push({
+          x: response,
+          value: questions[i].responses[response],
+        });
       }
       results.push(singleResult);
     }
@@ -306,54 +307,47 @@ rhit.Survey = class {
   }
 };
 
-rhit.MakeSurvey = class { 
+rhit.MakeSurveyController = class {
+  constructor() {
+    document.querySelector("#menuShowAllSurveys").onclick = (event) => {
+      window.location.href = "/list.html";
+    };
 
-  constructor() { 
+    document.querySelector("#menuShowMySurveys").onclick = (event) => {
+      window.location.href = `/userSurveyPage.html?uid=${rhit.fbAuthManager.uid}`;
+    };
 
+    document.querySelector("#menuSignOut").onclick = (event) => {
+      rhit.fbAuthManager.signOut();
+    };
+      document.querySelector("#makeSurveySubmit").onclick = (event) => {
+        rhit.makeSurvey.getData();
+      };
+  }
+};
+
+rhit.MakeSurvey = class {
+  constructor() {
 
   }
+  getData() {
+    //Fill
+    let num = document.getElementById("nummQuestions").value;
 
-  getData(){ 
- 
-    
+    var target = document.getElementById("finishSurvey");
 
+    target.innerHTML = "<br> <br>";
 
-    //Fill 
-    let num = document.getElementById('nummQuestions').value;
-
-    var target = document.getElementById('finishSurvey'); 
-
-    target.innerHTML = '<br> <br>'; 
-
-    for(let i = 0; i < num; i++){
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-    
-
-
-
-    } 
-
-
-
-    
-    
-
-
-
-
-  } 
-
-
-  
-
-
-
+    for (let i = 0; i < num; i++) {
+      target.innerHTML +=
+        '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>';
+    }
+  }
 }
 
 rhit.ResultsController = class {
   constructor() {
     rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
-    
   }
   updateView() {
     const questionResults = rhit.singleSurveyManager.results; //Insert Question.data in an array
@@ -535,16 +529,23 @@ rhit.initializePage = function () {
     rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
     new rhit.ResultsController();
   }
+
+  if (document.querySelector("#finishSurvey")) {
+    rhit.surveysManager = new rhit.SurveysManager();
+    rhit.makeSurvey = new rhit.MakeSurvey();
+    new rhit.MakeSurveyController();
+  }
+  
 };
 
 /* Main */
 /** function and class syntax examples */
 rhit.main = function () {
   console.log("Ready");
-  rhit.makeSurvey = new rhit.MakeSurvey(); 
+  
   rhit.fbAuthManager = new rhit.FbAuthManager();
-  rhit.mainMenuController = new rhit.MainMenuController(); 
-  rhit.makeSurvey = rhit.MakeSurvey(); 
+  // rhit.mainMenuController = new rhit.MainMenuController();
+  
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
