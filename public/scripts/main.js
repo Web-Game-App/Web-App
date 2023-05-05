@@ -323,7 +323,7 @@ rhit.MakeSurvey = class {
 
     var target = document.getElementById('finishSurvey'); 
 
-    target.innerHTML = '<br> <br>'; 
+    target.innerHTML = '<br> <br> <br>'; 
 
     for(let i = 0; i < num; i++){
       target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
