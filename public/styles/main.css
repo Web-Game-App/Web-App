@@ -159,6 +159,13 @@ a{
   color: white ;
 }
 
+.background {
+  background-image: url('https://i1.wp.com/www.wishtv.com/wp-content/uploads/2020/08/Rose-Hulman-Institute-of-Technology.jpg?fit=960%2C540&ssl=1');
+  background-repeat: none;
+  background-size: cover;
+  background-position: center center;
+}
+
 
  
         
