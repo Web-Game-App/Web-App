@@ -7,6 +7,7 @@ rhit.FB_KEY_QUESTIONS = "questions";
 rhit.FB_KEY_RESPONSES = "responses";
 rhit.FB_KEY_TIME_POSTED = "timePosted";
 rhit.FB_KEY_AUTHOR = "author";
+rhit.FB_KEY_QUESTION_TITLE = "questionTitle";
 rhit.singleSurveyManager = null;
 rhit.surveysManager = null;
 rhit.resultsManager = null;
@@ -311,12 +312,21 @@ rhit.MakeSurvey = class {
 
 rhit.ResultsController = class {
   constructor() {
-    var questionResults = ""; //Insert Question.data in an array
+    rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
+  }
+  updateView() {
+    const questionResults = rhit.singleSurveyManager.results; //Insert Question.data in an array
+   
     this.chart = anychart.pie();
-    this.chart.title("Inert Question Here");
-    this.chart.data(questionResults);
-    this.chart.container("#resultsPage");
+    this.chart.title(rhit.singleSurveyManager.getQuestionAtIndex(0).questionTitle); //Need to make it insert the different questions not just 0
+    
+    this.chart.data(questionResults[0]);
+    this.chart.container("resultsPage");
+    this.chart.radius("40%");
     this.chart.draw();
+    this.chart.legend().position("right");
+    this.chart.legend().itemsLayout("vertical");
+    
   }
   _createResults() {
     return htmlToElement();
