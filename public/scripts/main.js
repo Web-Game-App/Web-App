@@ -371,7 +371,7 @@ rhit.ResultsController = class {
     const questionResults = rhit.singleSurveyManager.results; //Insert Question.data in an array
     console.log(questionResults);
     this.chart = anychart.pie();
-    this.chart.title("Inert Question Here");
+    this.chart.title(document.querySelector("#resultsPage").innerHTML = rhit.SingleSurveyManager.questionTitle);
     this.chart.data(questionResults[0]);
     this.chart.container("resultsPage");
     this.chart.draw();
