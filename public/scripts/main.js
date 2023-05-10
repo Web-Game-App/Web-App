@@ -382,7 +382,7 @@ rhit.ResultsController = class {
       this.updateView();
     }
     document.querySelector("#deleteButton").onclick = (event) => {
-      singleSurveyManager.delete();
+      rhit.singleSurveyManager.delete();
     }
   }
   updateView() {
