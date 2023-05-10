@@ -26,7 +26,7 @@ function htmlToElement(html) {
 rhit.MainMenuController = class {
   constructor() {
     document.querySelector("#menuShowAllSurveys").onclick = (event) => {
-      window.location.href = "http://127.0.0.1:3000/public/list.html";
+      window.location.href = "/list.html";
     };
 
     document.querySelector("#menuShowMySurveys").onclick = (event) => {
@@ -37,20 +37,11 @@ rhit.MainMenuController = class {
       rhit.fbAuthManager.signOut();
     };
 
-    document.querySelector("#makeSurveySubmit").onclick = (event) => { 
-
-      rhit.makeSurvey.getData(); 
-      
-     
-      
-       
-
-
-
-
-      
-
-    };
+    if(document.querySelector("#makesurveySubmit")) {
+      document.querySelector("#makeSurveySubmit").onclick = (event) => {
+        window.location.href = '/makesurvey.html';
+      }
+    }
 
 
     
@@ -61,11 +52,16 @@ rhit.MainMenuController = class {
 
 
 
-     rhit.surveysManager.beginListening(this.updateList.bind(this));
+    
     rhit.surveysManager.beginListening(this.updateList.bind(this));
   }
 
-  _createCard(survey) {
+  _createCard(survey) {;
+    let link = `/question.html?id${survey.id}`;
+    if(survey.author = rhit.fbAuthManager.uid) {
+      link = `resultsPage.html?id=${survey.id}`;
+    }
+    
     return htmlToElement(`<div
                   class="card row-hover pos-relative py-3 px-3 mb-3 border-warning border-top-0 border-right-0 border-bottom-0 rounded-0"
                 >
@@ -488,7 +484,7 @@ rhit.main = function () {
   console.log("Ready");
   rhit.makeSurvey = new rhit.MakeSurvey(); 
   rhit.fbAuthManager = new rhit.FbAuthManager();
-  rhit.mainMenuController = new rhit.MainMenuController(); 
+  // rhit.mainMenuController = new rhit.MainMenuController(); 
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
