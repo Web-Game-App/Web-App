@@ -169,7 +169,7 @@ a{
 #resultsPage {
   position: absolute;
   top: 70px;
-  bottom: 0px;
+  bottom: 100px;
   right: 0px;
   left: 0px;
 }
