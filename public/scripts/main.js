@@ -68,7 +68,7 @@ rhit.MainMenuController = class {
                   <div class="row align-items-center">
                     <div class="col-md-8 mb-3 mb-sm-0">
                       <h5>
-                        <a href="/question.html?id=${survey.id}" class="text-primary"
+                        <a href="${link}" class="text-primary"
                           >${survey.name}</a
                         >
                       </h5>
