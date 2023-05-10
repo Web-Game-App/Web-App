@@ -366,14 +366,34 @@ rhit.MakeSurvey = class {
 rhit.ResultsController = class {
   constructor() {
     rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
+    this.num = 0;
+    document.querySelector("#nextResultsButton").onclick = (event) => {
+      if(this.num >= rhit.singleSurveyManager.numQuestions) {
+        return;
+      }
+      this.num++;
+      this.updateView()
+    }
+    document.querySelector("#previousResultsButton").onclick = (event) => {
+      if(this.num <= 0) {
+        return;
+      }
+      this.num--;
+      this.updateView();
+    }
   }
   updateView() {
     const questionResults = rhit.singleSurveyManager.results; //Insert Question.data in an array
+    const resultsContainer = document.querySelector("#resultsPage");
+    resultsContainer.replaceChildren();
     console.log(questionResults);
     this.chart = anychart.pie();
-    this.chart.title("Inert Question Here");
-    this.chart.data(questionResults[0]);
+    this.chart.title(rhit.singleSurveyManager.getQuestionAtIndex(this.num).questionTitle);
+    this.chart.data(questionResults[this.num]);
     this.chart.container("resultsPage");
+    this.chart.legend().position("right");
+    this.chart.legend().itemsLayout("vertical");
+    this.chart.radius("30%");
     this.chart.draw();
   }
   _createResults() {

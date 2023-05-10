@@ -166,9 +166,12 @@ a{
   background-position: center center;
 }
 
-
- 
-        
-        
+#resultsPage {
+  position: absolute;
+  top:55px;
+  right:0px;
+  bottom:0px;
+  left:0px;
+}
 
 
