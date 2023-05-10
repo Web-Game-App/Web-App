@@ -243,7 +243,7 @@ rhit.SingleSurveyManager = class {
     this._unsubscribe();
   }
   delete() {
-    return this._ref.delete();
+    return this._ref.delete().then(()=> window.location.href = "/list.html");
   }
   getQuestionAtIndex(index) {
     const questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
@@ -380,6 +380,9 @@ rhit.ResultsController = class {
       }
       this.num--;
       this.updateView();
+    }
+    document.querySelector("#deleteButton").onclick = (event) => {
+      singleSurveyManager.delete();
     }
   }
   updateView() {
