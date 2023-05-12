@@ -368,7 +368,7 @@ rhit.ResultsController = class {
     rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
     this.num = 0;
     document.querySelector("#nextResultsButton").onclick = (event) => {
-      if(this.num >= rhit.singleSurveyManager.numQuestions) {
+      if(this.num >= rhit.singleSurveyManager.numQuestions - 1) {
         return;
       }
       this.num++;
