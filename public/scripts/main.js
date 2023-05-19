@@ -221,16 +221,7 @@ rhit.SingleSurveyManager = class {
     this._unsubscribe();
   }
   delete() {
-    return this._ref.delete();
-  }
-  add(response, questionNum) {
-    if (this.response[questionNum]) {
-      this.response[questionNum] = response;
-      console.log(response);
-      return;
-    }
-    this.response.push(response)
-    console.log(this.response);
+    return this._ref.delete().then(() => (window.location.href = "/list.html"));
   }
   getQuestionAtIndex(index) {
     const questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
@@ -276,145 +267,184 @@ rhit.Survey = class {
 rhit.MakeSurvey = class { 
 
   constructor() {
+    document.querySelector("#menuShowAllSurveys").onclick = (event) => {
+      window.location.href = "/list.html";
+    };
 
-    document.querySelector("#makeSurveySubmit").onclick = (event) => { 
+    document.querySelector("#menuShowMySurveys").onclick = (event) => {
+      window.location.href = `/userSurveyPage.html?uid=${rhit.fbAuthManager.uid}`;
+    };
 
-         
+    document.querySelector("#menuSignOut").onclick = (event) => {
+      rhit.fbAuthManager.signOut();
+    };
+    document.querySelector("#makeSurveySubmit").onclick = (event) => {
+      rhit.makeSurvey.getData();
+    };
+  }
+};
 
-      rhit.makeSurvey.getData(); 
-  
-      document.querySelector("#makeAnswerSubmit").onclick = (event) => { 
-  
-        rhit.makeSurvey.getAnswers1(); 
-  
-       
-          
-         
-          
-        };
-  
-      
-     
-      
+rhit.MakeSurvey = class {
+  constructor() {
+    this.title = null;
+    this.numQuestions = 0;
+    this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_SURVEYS);
+    this.answersNumOrder = [];
+  }
+
+  getData() {
+    this.title = document.querySelector("#name").value;
+    let num = document.getElementById("nummQuestions").value;
+
+    this.numQuestions = num;
+
+    var target = document.getElementById("finishSurvey");
+
+    target.innerHTML = "<br> <br> <br>";
+
+    for (let i = 0; i < num; i++) {
+      target.innerHTML +=
+        '<div class="form-outline"> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question ' +
+        (i + 1) +
+        '</label></div> <div class="form-control"> <label for="role" id="label-role" style="margin-left: 15px;" > How many Answers? </label> <!-- Dropdown options --> <select id="numAnswers' +
+        i +
+        '" name="role" style="margin-left: 15px;" >  <option value= 1 >1</option> <option value=2>2</option> <option value=3>3</option> <option value=4>4</option> </select> </div> <div id= spaceForAnswers' +
+        i +
+        " >  </div> ";
+    }
+
+    target.innerHTML +=
+      '<button id="makeAnswerSubmit"  type="button" class="btn btn-primary"> Submit number of Answers </button>';
+
+    document.querySelector("#makeAnswerSubmit").onclick = (event) => {
+        this.getAnswers1();
       };
-
-    this.numQuestions = 0; 
-
-    this.answersNumOrder = []; 
-
-    
-
-
-
-   
-    
-    
-
-
-
   }
 
-  getData(){ 
-    
-    let num = document.getElementById('nummQuestions').value;
-    
+  getAnswers1() {
+    var target = document.getElementById("finishSurvey");
 
-    this.numQuestions = num; 
-
-       var target = document.getElementById('finishSurvey'); 
-   
-       target.innerHTML = '<br> <br> <br>';   
-
-
-
-       for(let  i = 0; i < num; i++){ 
-
-      target.innerHTML += '<div class="form-outline"> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question '+(i+1)+'</label></div> <div class="form-control"> <label for="role" id="label-role" style="margin-left: 15px;" > How many Answers? </label> <!-- Dropdown options --> <select id="numAnswers'+i+'" name="role" style="margin-left: 15px;" >  <option value= 1 >1</option> <option value=2>2</option> <option value=3>3</option> <option value=4>4</option> </select> </div> <div id= spaceForAnswers'+i+' >  </div> '; 
-      
-       
-    
-    
+    for (let i = 0; i < this.numQuestions; i++) {
+      this.answersNumOrder.push(
+        document.getElementById("numAnswers" + i + "").value
+      );
     }
 
-    target.innerHTML += '<button id="makeAnswerSubmit"  type="button" class="btn btn-primary"> Submit number of Answers </button>'
-
-    
-
-    
-  }
-  
-  getAnswers1(){
-
-  var target = document.getElementById('finishSurvey'); 
-
- 
-
-  for(let i = 0; i < this.numQuestions; i++ ) {
-
-
-    this.answersNumOrder.push( document.getElementById('numAnswers'+i+'').value)
-
-
-
-  }
-
-  for(let j = 0; j <this.answersNumOrder.length; j++){
-
-    console.log(this.answersNumOrder[j])
-
-  }
-  
-
-
-  for(let i = 0; i < this.numQuestions; i++ ) {
-
-   
-   
-     
-  
-  if(i < 1) { 
-
-      
-
-      target.innerHTML = '<br> <br> <br>'; 
-
+    for (let j = 0; j < this.answersNumOrder.length; j++) {
+      console.log(this.answersNumOrder[j]);
     }
 
-    
-    target.innerHTML += '  <div class="form-outline mb-4">  <input type="text" id="form4Example1" class="form-control" /> <label class="form-label" for="form4Example1">Question '+(i+1)+'</label></div>'
+    for (let i = 0; i < this.numQuestions; i++) {
+      if (i < 1) {
+        target.innerHTML = "<br> <br> <br>";
+      }
 
-    for(let k = 0; k < this.answersNumOrder[i]; k++){ 
+      target.innerHTML +=
+        `<div class="form-outline mb-4">  <input type="text" id="questionTitle${i}" class="form-control" /> <label class="form-label" for="form4Example1">Question ` +
+        (i + 1) +
+        "</label></div>";
 
-      target.innerHTML += '<input type="text" id="Q'+i+'" placeholder="Enter Answer '+(k+1)+'"> <br> <br> '
-
-
+      for (let k = 0; k < this.answersNumOrder[i]; k++) {
+        target.innerHTML +=
+          '<input type="text" id="questionOption' +
+          i + "-" + k +
+          '" placeholder="Enter Answer ' +
+          (k + 1) +
+          '"> <br> <br> ';
+      }
     }
 
-  
+    target.innerHTML +=
+      '<button id="submitSurvey"  type="button" class="btn btn-primary"> Submit survey </button>';
 
- 
+    document.querySelector("#submitSurvey").onclick = (event) => {
+        this.submitSurvey();
+      };
+  }
 
-    
+  submitSurvey() {
+    // Add a new document with a generated id.
+  let questionArray = [];
+  for (let i = 0; i < this.numQuestions; i++) {
+      let object = {"options": [], "questionTitle": document.querySelector(`#questionTitle${i}`).value, "responses": {}};
+      for (let k = 0; k < this.answersNumOrder[i]; k++) {
+        const questionOption = document.querySelector(`#questionOption${i}-${k}`).value;
+        object.options.push(questionOption);
+        object.responses[questionOption] = 0;
+      }
+      questionArray.push(object);
+    }
+    console.log(questionArray);
+  this._ref.add({
+    author: rhit.fbAuthManager.uid,
+    name: this.title,
+    questions: questionArray,
+    responses: 0,
+    timePosted: firebase.firestore.Timestamp.now()
+})
+.then((docRef) => {
+    console.log("Document written with ID: ", docRef.id);
+    window.location.href = "/list.html";
+})
+.catch((error) => {
+    console.error("Error adding document: ", error);
+});
+  }
+};
 
- }
+// rhit.MakeSurvey = class {
+//   constructor() {}
+//   getData() {
+//     //Fill
+//     let num = document.getElementById("nummQuestions").value;
 
-} 
+//     var target = document.getElementById("finishSurvey");
 
-} 
+//     target.innerHTML = "<br> <br>";
+
+//     for (let i = 0; i < num; i++) {
+//       target.innerHTML +=
+//         '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>';
+//     }
+//   }
+// };
 
 rhit.ResultsController = class {
   constructor() {
     rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
+    this.num = 0;
+    document.querySelector("#nextResultsButton").onclick = (event) => {
+      if (this.num >= rhit.singleSurveyManager.numQuestions - 1) {
+        return;
+      }
+      this.num++;
+      this.updateView();
+    };
+    document.querySelector("#previousResultsButton").onclick = (event) => {
+      if (this.num <= 0) {
+        return;
+      }
+      this.num--;
+      this.updateView();
+    };
+    document.querySelector("#deleteButton").onclick = (event) => {
+      rhit.singleSurveyManager.delete();
+    };
   }
   updateView() {
     const questionResults = rhit.singleSurveyManager.results; //Insert Question.data in an array
-   
+    const resultsContainer = document.querySelector("#resultsPage");
+    resultsContainer.replaceChildren();
+    console.log(questionResults);
     this.chart = anychart.pie();
-    this.chart.title(rhit.singleSurveyManager.getQuestionAtIndex(0).questionTitle); //Need to make it insert the different questions not just 0
-    
-    this.chart.data(questionResults[0]);
+    this.chart.title(
+      rhit.singleSurveyManager.getQuestionAtIndex(this.num).questionTitle
+    );
+    this.chart.data(questionResults[this.num]);
     this.chart.container("resultsPage");
-    this.chart.radius("40%");
+    this.chart.legend().position("right");
+    this.chart.legend().itemsLayout("vertical");
+    this.chart.radius("30%");
     this.chart.draw();
     this.chart.legend().position("right");
     this.chart.legend().itemsLayout("vertical");
@@ -573,15 +603,33 @@ rhit.initializePage = function () {
     rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
     new rhit.SurveyDisplayManager(questionNum);
   }
+
+  if (document.querySelector("#resultsPage")) {
+    const id = urlParams.get("id");
+
+    if (!id) {
+      window.location.href = "/";
+    }
+
+    rhit.singleSurveyManager = new rhit.SingleSurveyManager(id);
+    new rhit.ResultsController();
+  }
+
+  if (document.querySelector("#finishSurvey")) {
+    rhit.surveysManager = new rhit.SurveysManager();
+    rhit.makeSurvey = new rhit.MakeSurvey();
+    new rhit.MakeSurveyController();
+  }
 };
 
 /* Main */
 /** function and class syntax examples */
 rhit.main = function () {
   console.log("Ready");
-  
+
   rhit.fbAuthManager = new rhit.FbAuthManager();
-  // rhit.mainMenuController = new rhit.MainMenuController(); 
+  // rhit.mainMenuController = new rhit.MainMenuController();
+
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
