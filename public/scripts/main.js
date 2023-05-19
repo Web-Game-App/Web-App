@@ -281,7 +281,7 @@ rhit.MakeSurvey = class {
 
     this.answersNumOrder = []; 
 
-    this.reff = firebase.firestore().collection("Surveys");
+    
 
 
 
