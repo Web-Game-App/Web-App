@@ -277,6 +277,27 @@ rhit.MakeSurvey = class {
 
   constructor() {
 
+    document.querySelector("#makeSurveySubmit").onclick = (event) => { 
+
+         
+
+      rhit.makeSurvey.getData(); 
+  
+      document.querySelector("#makeAnswerSubmit").onclick = (event) => { 
+  
+        rhit.makeSurvey.getAnswers1(); 
+  
+       
+          
+         
+          
+        };
+  
+      
+     
+      
+      };
+
     this.numQuestions = 0; 
 
     this.answersNumOrder = []; 
@@ -536,6 +557,7 @@ rhit.initializePage = function () {
     new rhit.LoginController();
   }
 
+
   if (document.querySelector("#questionPage")) {
     const id = urlParams.get("id");
     let questionNum = urlParams.get("num");
@@ -557,9 +579,9 @@ rhit.initializePage = function () {
 /** function and class syntax examples */
 rhit.main = function () {
   console.log("Ready");
-  rhit.makeSurvey = new rhit.MakeSurvey(); 
+  
   rhit.fbAuthManager = new rhit.FbAuthManager();
-  rhit.mainMenuController = new rhit.MainMenuController(); 
+  // rhit.mainMenuController = new rhit.MainMenuController(); 
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
