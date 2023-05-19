@@ -243,7 +243,7 @@ rhit.SingleSurveyManager = class {
     this._unsubscribe();
   }
   delete() {
-    return this._ref.delete().then(()=> window.location.href = "/list.html");
+    return this._ref.delete().then(() => (window.location.href = "/list.html"));
   }
   getQuestionAtIndex(index) {
     const questions = this._documentSnapshot.get(rhit.FB_KEY_QUESTIONS);
@@ -320,70 +320,158 @@ rhit.MakeSurveyController = class {
     document.querySelector("#menuSignOut").onclick = (event) => {
       rhit.fbAuthManager.signOut();
     };
-      document.querySelector("#makeSurveySubmit").onclick = (event) => {
-        rhit.makeSurvey.getData();
-      };
+    document.querySelector("#makeSurveySubmit").onclick = (event) => {
+      rhit.makeSurvey.getData();
+    };
   }
 };
 
 rhit.MakeSurvey = class {
   constructor() {
-
+    this.title = null;
+    this.numQuestions = 0;
+    this._ref = firebase.firestore().collection(rhit.FB_COLLECTION_SURVEYS);
+    this.answersNumOrder = [];
   }
+
   getData() {
-    //Fill
+    this.title = document.querySelector("#name").value;
     let num = document.getElementById("nummQuestions").value;
 
-    var target = document.getElementById('finishSurvey'); 
+    this.numQuestions = num;
 
-    target.innerHTML = '<br> <br>'; 
+    var target = document.getElementById("finishSurvey");
 
-    for(let i = 0; i < num; i++){
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
-    
+    target.innerHTML = "<br> <br> <br>";
 
+    for (let i = 0; i < num; i++) {
+      target.innerHTML +=
+        '<div class="form-outline"> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question ' +
+        (i + 1) +
+        '</label></div> <div class="form-control"> <label for="role" id="label-role" style="margin-left: 15px;" > How many Answers? </label> <!-- Dropdown options --> <select id="numAnswers' +
+        i +
+        '" name="role" style="margin-left: 15px;" >  <option value= 1 >1</option> <option value=2>2</option> <option value=3>3</option> <option value=4>4</option> </select> </div> <div id= spaceForAnswers' +
+        i +
+        " >  </div> ";
+    }
 
+    target.innerHTML +=
+      '<button id="makeAnswerSubmit"  type="button" class="btn btn-primary"> Submit number of Answers </button>';
 
-    } 
+    document.querySelector("#makeAnswerSubmit").onclick = (event) => {
+        this.getAnswers1();
+      };
+  }
 
+  getAnswers1() {
+    var target = document.getElementById("finishSurvey");
 
+    for (let i = 0; i < this.numQuestions; i++) {
+      this.answersNumOrder.push(
+        document.getElementById("numAnswers" + i + "").value
+      );
+    }
 
-    
-    
+    for (let j = 0; j < this.answersNumOrder.length; j++) {
+      console.log(this.answersNumOrder[j]);
+    }
 
+    for (let i = 0; i < this.numQuestions; i++) {
+      if (i < 1) {
+        target.innerHTML = "<br> <br> <br>";
+      }
 
+      target.innerHTML +=
+        `<div class="form-outline mb-4">  <input type="text" id="questionTitle${i}" class="form-control" /> <label class="form-label" for="form4Example1">Question ` +
+        (i + 1) +
+        "</label></div>";
 
+      for (let k = 0; k < this.answersNumOrder[i]; k++) {
+        target.innerHTML +=
+          '<input type="text" id="questionOption' +
+          i + "-" + k +
+          '" placeholder="Enter Answer ' +
+          (k + 1) +
+          '"> <br> <br> ';
+      }
+    }
 
-  } 
+    target.innerHTML +=
+      '<button id="submitSurvey"  type="button" class="btn btn-primary"> Submit survey </button>';
 
+    document.querySelector("#submitSurvey").onclick = (event) => {
+        this.submitSurvey();
+      };
+  }
 
-  
+  submitSurvey() {
+    // Add a new document with a generated id.
+  let questionArray = [];
+  for (let i = 0; i < this.numQuestions; i++) {
+      let object = {"options": [], "questionTitle": document.querySelector(`#questionTitle${i}`).value, "responses": {}};
+      for (let k = 0; k < this.answersNumOrder[i]; k++) {
+        const questionOption = document.querySelector(`#questionOption${i}-${k}`).value;
+        object.options.push(questionOption);
+        object.responses[questionOption] = 0;
+      }
+      questionArray.push(object);
+    }
+    console.log(questionArray);
+  this._ref.add({
+    author: rhit.fbAuthManager.uid,
+    name: this.title,
+    questions: questionArray,
+    responses: 0,
+    timePosted: firebase.firestore.Timestamp.now()
+})
+.then((docRef) => {
+    console.log("Document written with ID: ", docRef.id);
+    window.location.href = "/list.html";
+})
+.catch((error) => {
+    console.error("Error adding document: ", error);
+});
+  }
+};
 
+// rhit.MakeSurvey = class {
+//   constructor() {}
+//   getData() {
+//     //Fill
+//     let num = document.getElementById("nummQuestions").value;
 
+//     var target = document.getElementById("finishSurvey");
 
-}
+//     target.innerHTML = "<br> <br>";
+
+//     for (let i = 0; i < num; i++) {
+//       target.innerHTML +=
+//         '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>';
+//     }
+//   }
+// };
 
 rhit.ResultsController = class {
   constructor() {
     rhit.singleSurveyManager.beginListening(this.updateView.bind(this));
     this.num = 0;
     document.querySelector("#nextResultsButton").onclick = (event) => {
-      if(this.num >= rhit.singleSurveyManager.numQuestions - 1) {
+      if (this.num >= rhit.singleSurveyManager.numQuestions - 1) {
         return;
       }
       this.num++;
-      this.updateView()
-    }
+      this.updateView();
+    };
     document.querySelector("#previousResultsButton").onclick = (event) => {
-      if(this.num <= 0) {
+      if (this.num <= 0) {
         return;
       }
       this.num--;
       this.updateView();
-    }
+    };
     document.querySelector("#deleteButton").onclick = (event) => {
       rhit.singleSurveyManager.delete();
-    }
+    };
   }
   updateView() {
     const questionResults = rhit.singleSurveyManager.results; //Insert Question.data in an array
@@ -391,7 +479,9 @@ rhit.ResultsController = class {
     resultsContainer.replaceChildren();
     console.log(questionResults);
     this.chart = anychart.pie();
-    this.chart.title(rhit.singleSurveyManager.getQuestionAtIndex(this.num).questionTitle);
+    this.chart.title(
+      rhit.singleSurveyManager.getQuestionAtIndex(this.num).questionTitle
+    );
     this.chart.data(questionResults[this.num]);
     this.chart.container("resultsPage");
     this.chart.legend().position("right");
@@ -576,17 +666,16 @@ rhit.initializePage = function () {
     rhit.makeSurvey = new rhit.MakeSurvey();
     new rhit.MakeSurveyController();
   }
-  
 };
 
 /* Main */
 /** function and class syntax examples */
 rhit.main = function () {
   console.log("Ready");
-  
+
   rhit.fbAuthManager = new rhit.FbAuthManager();
   // rhit.mainMenuController = new rhit.MainMenuController();
-  
+
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
