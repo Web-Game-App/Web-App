@@ -37,11 +37,26 @@ rhit.MainMenuController = class {
       rhit.fbAuthManager.signOut();
     };
 
-    if(document.querySelector("#makesurveySubmit")) {
-      document.querySelector("#makeSurveySubmit").onclick = (event) => {
-        window.location.href = '/makesurvey.html';
-      }
-    }
+    document.querySelector("#makeSurveySubmit").onclick = (event) => { 
+
+         
+
+      rhit.makeSurvey.getData(); 
+  
+      document.querySelector("#makeAnswerSubmit").onclick = (event) => { 
+  
+        rhit.makeSurvey.getAnswers1(); 
+  
+       
+          
+         
+          
+        };
+  
+      
+     
+      
+      };
 
 
     
@@ -260,20 +275,30 @@ rhit.Survey = class {
 
 rhit.MakeSurvey = class { 
 
-  constructor() { 
+  constructor() {
+
+    this.numQuestions = 0; 
+
+    this.answersNumOrder = []; 
+
+    this.reff = firebase.firestore().collection("Surveys");
+
+
+
+   
+    
+    
+
 
 
   }
 
   getData(){ 
- 
+    
     let num = document.getElementById('nummQuestions').value;
+    
 
-      console.log(num);
-
-       
-
-
+    this.numQuestions = num; 
 
        var target = document.getElementById('finishSurvey'); 
    
@@ -283,28 +308,78 @@ rhit.MakeSurvey = class {
 
        for(let  i = 0; i < num; i++){ 
 
-      target.innerHTML += '<div class="form-outline"> <input type="text" id="formControlLg" class="form-control form-control-lg" /> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question</label></div> <button type="button" class="btn btn-primary" value="Submit" onclick="getData()"> Add Answer</button>'; 
+      target.innerHTML += '<div class="form-outline"> <label class="form-label" for="formControlLg" style="margin-left: 15px;" id="numQuestions">Question '+(i+1)+'</label></div> <div class="form-control"> <label for="role" id="label-role" style="margin-left: 15px;" > How many Answers? </label> <!-- Dropdown options --> <select id="numAnswers'+i+'" name="role" style="margin-left: 15px;" >  <option value= 1 >1</option> <option value=2>2</option> <option value=3>3</option> <option value=4>4</option> </select> </div> <div id= spaceForAnswers'+i+' >  </div> '; 
       
-     
-      
-
-
-
-
+       
+    
     
     }
 
+    target.innerHTML += '<button id="makeAnswerSubmit"  type="button" class="btn btn-primary"> Submit number of Answers </button>'
+
+    
+
+    
+  }
+  
+  getAnswers1(){
+
+  var target = document.getElementById('finishSurvey'); 
+
+ 
+
+  for(let i = 0; i < this.numQuestions; i++ ) {
+
+
+    this.answersNumOrder.push( document.getElementById('numAnswers'+i+'').value)
 
 
 
-  } 
+  }
 
+  for(let j = 0; j <this.answersNumOrder.length; j++){
 
+    console.log(this.answersNumOrder[j])
+
+  }
   
 
 
+  for(let i = 0; i < this.numQuestions; i++ ) {
 
-}
+   
+   
+     
+  
+  if(i < 1) { 
+
+      
+
+      target.innerHTML = '<br> <br> <br>'; 
+
+    }
+
+    
+    target.innerHTML += '  <div class="form-outline mb-4">  <input type="text" id="form4Example1" class="form-control" /> <label class="form-label" for="form4Example1">Question '+(i+1)+'</label></div>'
+
+    for(let k = 0; k < this.answersNumOrder[i]; k++){ 
+
+      target.innerHTML += '<input type="text" id="Q'+i+'" placeholder="Enter Answer '+(k+1)+'"> <br> <br> '
+
+
+    }
+
+  
+
+ 
+
+    
+
+ }
+
+} 
+
+} 
 
 rhit.ResultsController = class {
   constructor() {
@@ -484,7 +559,7 @@ rhit.main = function () {
   console.log("Ready");
   rhit.makeSurvey = new rhit.MakeSurvey(); 
   rhit.fbAuthManager = new rhit.FbAuthManager();
-  // rhit.mainMenuController = new rhit.MainMenuController(); 
+  rhit.mainMenuController = new rhit.MainMenuController(); 
   rhit.fbAuthManager.beginListening(() => {
     console.log("auth change callcback fired.");
 
